@@ -5,6 +5,7 @@ import Navbar from './Navbar/Navbar'
 import Products from './Products'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Checkout from './CheckoutForm/Checkout';
+import Confirm from './CheckoutForm/Confirm';
 
 const App = () => {
 
@@ -87,6 +88,7 @@ const App = () => {
                     error={errorMessage}
                     />}>
                     </Route>
+                    <Route exact path="/confirm" element={<Confirm />}/>
                 </Routes>
             </div>
         </Router>

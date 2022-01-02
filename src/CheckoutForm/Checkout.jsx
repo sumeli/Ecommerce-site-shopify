@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { Paper, Stepper, Step, StepLabel, Typography, CircularProgress, Divider, Button } from '@mui/material'
+import { Paper, Stepper, Step, StepLabel, Typography, CircularProgress, Divider, Button, CssBaseline } from '@mui/material'
 import useStyles from './CheckoutStyles'
-import {Link} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { commerce } from '../Lib/Commerce'
 import AddressForm from './AddressForm'
 import PaymentForm from './PaymentForm'
+import Confirm from './Confirm'
 
 const steps = ['Shipping address', 'Payment details']
 
 const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [checkoutTocken, setCheckoutTocken] = useState(null)
+  const [isFinished, setIsFinished] = useState(false)
   const [activeStep, setActiveStep] = useState(0)
   const [shippingData, setShippingData] = useState({})
 
@@ -22,7 +25,7 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
         setCheckoutTocken(token)
       }
       catch (error) {
-
+        navigate("/")
       }
     }
     generateToken();
@@ -36,6 +39,15 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
     nextStep()
   }
 
+  const timeout = () => {
+    setTimeout(() => {
+      setIsFinished(true)
+    }, 3000);
+  }
+
+  // This confirmation part is not used since Stripe has an update and I have to make a real
+  // account and have to provide my bank details to get a proper api key.
+
   let Confirmation = () => (order.customer ? (
     <>
       <div>
@@ -46,11 +58,21 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
       <br />
       <Button component={Link} variant="outlined" type="button" to="/">Back to home</Button>
     </>
+  ) : isFinished ? (
+    <>
+      <div>
+        <Typography variant="h5">Thank you for your purchase!</Typography>
+        <Divider className={classes.divider} />
+      </div>
+      <br />
+      <Button component={Link} variant="outlined" type="button" to="/">Back to home</Button>
+    </>
   ) : (
     <div className={classes.spinner}>
       <CircularProgress />
     </div>
   ));
+
 
   if (error) {
     Confirmation = () => (
@@ -70,10 +92,12 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
       backStep={backStep}
       nextStep={nextStep}
       onCaptureCheckout={onCaptureCheckout}
+      timeout={timeout}
     />
 
   return (
     <>
+      <CssBaseline />
       <div className={classes.toolbar} />
       <main className={classes.layout}>
         <Paper className={classes.paper}>
@@ -85,7 +109,7 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
               </Step>
             ))}
           </Stepper>
-          {activeStep == steps.length ? <Confirmation /> : checkoutTocken && <Form />}
+          {activeStep == steps.length ? <Confirm order={order} error={error} isFinished={isFinished} /> : checkoutTocken && <Form />}
         </Paper>
       </main>
     </>

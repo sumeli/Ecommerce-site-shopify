@@ -2,11 +2,12 @@ import React from 'react'
 import { Typography, Button, Divider } from '@mui/material'
 import { Elements, CardElement, ElementsConsumer } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
+import { Link } from 'react-router-dom'
 import Review from './Review'
 
 const stripePromise = loadStripe('process.env.REACT_APP_STRIPE_PUBLIC_KEY')
 
-const PaymentForm = ({ checkoutTocken, backStep, shippingData, nextStep, onCaptureCheckout}) => {
+const PaymentForm = ({ checkoutTocken, backStep, shippingData, nextStep, onCaptureCheckout, timeout}) => {
 
         const handleSubmit = async (event, elements, stripe) => {
             event.preventDefault();
@@ -41,7 +42,7 @@ const PaymentForm = ({ checkoutTocken, backStep, shippingData, nextStep, onCaptu
                 };
 
                 onCaptureCheckout(checkoutTocken.id, orderData);
-
+                timeout();
                 nextStep();
             }
         };
@@ -59,7 +60,7 @@ const PaymentForm = ({ checkoutTocken, backStep, shippingData, nextStep, onCaptu
                             <br /> <br />
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Button variant='outlined' onClick={backStep}>Back</Button>
-                                <Button type='submit' variant='contained' disabled={!stripe} color="primary">
+                                <Button component={Link} to="/confirm"  type='submit' variant='contained' disabled={!stripe} color="primary">
                                     Pay {checkoutTocken.live.subtotal.formatted_with_symbol}
                                 </Button>
                             </div>
